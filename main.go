@@ -11,15 +11,14 @@ import (
 	"net/http"
 )
 
-
-
-
 type user struct{
 	Id int `json:"id"`
 	Name string `json:"name"`
 	Money sql.NullInt64 `json:"money"`
 }
 var users []user
+var db *sql.DB
+var err error
 
 type JsUSD struct {
 	Rates struct{
@@ -31,16 +30,6 @@ type JsUSD struct {
 
 
 func GetBalance(w http.ResponseWriter, r *http.Request){
-	pg_con_string := fmt.Sprintf("port=%d host=%s user=%s "+
-		"password=%s dbname=%s sslmode=disable",
-		5432, "localhost", "habrpguser", "passwd", "habrdb")
-
-	db, err := sql.Open("postgres", pg_con_string)
-	if err != nil {
-		panic(err)
-	}
-	defer db.Close()
-	err = db.Ping()
 
 	w.Header().Set("Content-Type", "application/json")
 	param := mux.Vars(r)
@@ -63,17 +52,6 @@ func GetBalance(w http.ResponseWriter, r *http.Request){
 }
 
 func GetBalanceUSD(w http.ResponseWriter, r *http.Request){
-
-	pg_con_string := fmt.Sprintf("port=%d host=%s user=%s "+
-		"password=%s dbname=%s sslmode=disable",
-		5432, "localhost", "habrpguser", "passwd", "habrdb")
-
-	db, err := sql.Open("postgres", pg_con_string)
-	if err != nil {
-		panic(err)
-	}
-	defer db.Close()
-	err = db.Ping()
 
 	w.Header().Set("Content-Type", "application/json")
 	param := mux.Vars(r)
@@ -115,16 +93,6 @@ func GetBalanceUSD(w http.ResponseWriter, r *http.Request){
 }
 
 func ReplenishmentBalance(w http.ResponseWriter, r *http.Request){
-	pg_con_string := fmt.Sprintf("port=%d host=%s user=%s "+
-		"password=%s dbname=%s sslmode=disable",
-		5432, "localhost", "habrpguser", "passwd", "habrdb")
-
-	db, err := sql.Open("postgres", pg_con_string)
-	if err != nil {
-		panic(err)
-	}
-	defer db.Close()
-	err = db.Ping()
 
 	w.Header().Set("Content-Type", "application/json")
 	param := mux.Vars(r)
@@ -140,16 +108,6 @@ func ReplenishmentBalance(w http.ResponseWriter, r *http.Request){
 }
 
 func Debit(w http.ResponseWriter, r *http.Request){
-	pg_con_string := fmt.Sprintf("port=%d host=%s user=%s "+
-		"password=%s dbname=%s sslmode=disable",
-		5432, "localhost", "habrpguser", "passwd", "habrdb")
-
-	db, err := sql.Open("postgres", pg_con_string)
-	if err != nil {
-		panic(err)
-	}
-	defer db.Close()
-	err = db.Ping()
 
 	w.Header().Set("Content-Type", "application/json")
 	param := mux.Vars(r)
@@ -190,16 +148,6 @@ func Debit(w http.ResponseWriter, r *http.Request){
 }
 
 func Swap(w http.ResponseWriter, r *http.Request){
-	pg_con_string := fmt.Sprintf("port=%d host=%s user=%s "+
-		"password=%s dbname=%s sslmode=disable",
-		5432, "localhost", "habrpguser", "passwd", "habrdb")
-
-	db, err := sql.Open("postgres", pg_con_string)
-	if err != nil {
-		panic(err)
-	}
-	defer db.Close()
-	err = db.Ping()
 
 	w.Header().Set("Content-Type", "application/json")
 	param := mux.Vars(r)
@@ -239,6 +187,18 @@ func Swap(w http.ResponseWriter, r *http.Request){
 }
 
 func main() {
+
+	pg_con_string := fmt.Sprintf("port=%d host=%s user=%s "+
+		"password=%s dbname=%s sslmode=disable",
+		5432, "localhost", "habrpguser", "passwd", "habrdb")
+
+	db, err = sql.Open("postgres", pg_con_string)
+	if err != nil {
+		panic(err)
+	}
+	err = db.Ping()
+	defer db.Close()
+
 
 	r := mux.NewRouter()
 	r.HandleFunc("/users/{id}",GetBalance).Methods("GET")
